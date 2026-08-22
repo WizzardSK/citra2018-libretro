@@ -1,5 +1,17 @@
 # CMake 3.8 required for 17 to be a valid value for CXX_STANDARD
 cmake_minimum_required(VERSION 3.8)
+
+# CMake 4.0 dropped compatibility with cmake_minimum_required(VERSION < 3.5).
+# Bundled externals pinned as submodules (fmt declares 3.1.0, enet declares 2.6)
+# still request pre-3.5 policy versions and cannot be bumped from this tree, so
+# raise the floor for the whole build instead of requiring every consumer to
+# pass -DCMAKE_POLICY_VERSION_MINIMUM on the command line. A value supplied on
+# the command line or in the cache continues to take precedence, and CMake
+# older than 3.31 ignores the variable.
+if (NOT DEFINED CMAKE_POLICY_VERSION_MINIMUM)
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modules")
 include(CMakeDependentOption)
