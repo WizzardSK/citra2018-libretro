@@ -4,7 +4,7 @@ on: [push, workflow_dispatch]
 
 env:
   CI: false
-  CORE_ARGS: -DCMAKE_POLICY_VERSION_MINIMUM=3.5 "-DCMAKE_CXX_FLAGS=-Wno-invalid-specialization"
+  CORE_ARGS: -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS=-Wno-invalid-specialization
 
 jobs:
   osx:
