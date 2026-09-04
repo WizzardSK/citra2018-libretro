@@ -1,0 +1,32 @@
+name: buildbot preflight (android)
+on: [push, workflow_dispatch]
+
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [arm64-v8a, x86_64]
+    env:
+      ANDROID_NDK_VERSION: 29.0.14206865
+      API_LEVEL: 21
+      CORE_ARGS: -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - run: echo "y" | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager "ndk;$ANDROID_NDK_VERSION"
+      - name: Build (replays the android-cmake template)
+        run: |
+          export NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/$ANDROID_NDK_VERSION
+          cmake -DCMAKE_BUILD_TYPE=Release $CORE_ARGS \
+            -DANDROID_PLATFORM=android-$API_LEVEL \
+            -DCMAKE_TOOLCHAIN_FILE=$NDK_ROOT/build/cmake/android.toolchain.cmake \
+            -DANDROID_STL=c++_static -DANDROID_ABI=${{ matrix.abi }} \
+            . -Bbuild/android-${{ matrix.abi }}
+          cmake --build build/android-${{ matrix.abi }} --target citra2018_libretro --config Release -- -j$(nproc)
+      - name: Check
+        run: |
+          f=$(find build/android-${{ matrix.abi }} -name "citra2018_libretro.so" | head -1)
+          echo "$f"; ls -l "$f"; file "$f"
