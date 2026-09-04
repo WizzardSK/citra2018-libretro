@@ -1,7 +1,9 @@
 name: buildbot preflight (apple)
 on: [push, workflow_dispatch]
 
+
 env:
+  CI: false
   CORE_ARGS: -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 jobs:
