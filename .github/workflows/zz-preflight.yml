@@ -33,3 +33,19 @@ jobs:
         run: |
           f=$(find build/android-${{ matrix.abi }} -name "citra2018_libretro.so" | head -1)
           echo "$f"; ls -l "$f"; file "$f"
+
+  linux-x64:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build the way the buildbot linux job does
+        run: |
+          docker run --rm -e CI=false -v "$PWD":/src -w /src ubuntu:focal sh -c '
+            export DEBIAN_FRONTEND=noninteractive &&
+            apt-get update -qy &&
+            apt-get install -qy build-essential cmake pkg-config libgl1-mesa-dev &&
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 . -Bbuild/linux-x64 &&
+            cmake --build build/linux-x64 --target citra2018_libretro -- -j$(nproc) &&
+            ls -l build/linux-x64/src/citra_libretro/citra2018_libretro.so'
